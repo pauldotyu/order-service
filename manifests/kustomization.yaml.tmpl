@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- order-service.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+- name: order-service-configs
+  literals:
+  - ORDER_QUEUE_HOSTNAME=${SERVICE_BUS_HOSTNAME}
+  - ORDER_QUEUE_NAME=${SERVICE_BUS_QUEUE_NAME}
+  - USE_WORKLOAD_IDENTITY_AUTH="true"
+  - FASTIFY_ADDRESS="0.0.0.0"
+
+patches:
+- patch: |-
+    - op: add
+      path: "/spec/template/metadata/labels/azure.workload.identity~1use"
+      value: "true"
+  target:
+    kind: Deployment
+    name: order-service
+- patch: |-
+    - op: add
+      path: "/spec/template/spec/serviceAccount"
+      value: "${SERVICE_ACCOUNT_NAME}"
+  target:
+    kind: Deployment
+    name: order-service
+- patch: |-
+    - op: remove
+      path: "/spec/template/spec/containers/0/env"
+    - op: add
+      path: "/spec/template/spec/containers/0/envFrom"
+      value:
+        - configMapRef:
+            name: order-service-configs
+  target:
+    kind: Deployment
+    name: order-service
