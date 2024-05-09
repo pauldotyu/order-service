@@ -58,7 +58,7 @@ kubectl apply -k ./manifests --namespace $DEPLOYMENT_NAME
 Get the cluster IP of the order-service.
 
 ```bash
-CLUSTER_IP=$(kubectl get svc order-service --namespace $DEPLOYMENT_NAME -o jsonpath="{.spec.clusterIPs[0]}")  
+CLUSTER_IP=$(kubectl get svc order-service --namespace $DEPLOYMENT_NAME -o jsonpath="{.spec.clusterIPs[0]}")
 ```
 
 Test the order-service by submitting a POST request from a Pod in the cluster.
